@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  input, textarea, select {
+    background-color: #1E293B;
+    color: #F8FAFC;
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: #22C55E;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #94A3B8;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0F172A;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#22C55E] text-white font-semibold rounded-xl px-6 py-3 transition-all duration-200;
+    @apply hover:bg-[#16a34a] active:scale-95 cursor-pointer;
+  }
+
+  .btn-outline {
+    @apply border border-[#334155] text-[#F8FAFC] font-semibold rounded-xl px-6 py-3 transition-all duration-200;
+    @apply hover:border-[#22C55E] hover:text-[#22C55E] active:scale-95 cursor-pointer bg-transparent;
+  }
+
+  .card {
+    @apply bg-[#1E293B] rounded-2xl shadow-lg border border-[#334155];
+  }
+
+  .input-field {
+    @apply bg-[#0F172A] border border-[#334155] text-[#F8FAFC] rounded-lg px-4 py-3 w-full;
+    @apply focus:border-[#22C55E] focus:ring-2 focus:ring-[#22C55E]/20 outline-none transition-all duration-200;
+  }
+
+  .score-bar {
+    @apply h-1.5 rounded-full bg-[#334155] overflow-hidden;
+  }
+
+  .score-bar-fill {
+    @apply h-full rounded-full transition-all duration-1000;
+  }
+
+  .typing-dot {
+    @apply w-2 h-2 rounded-full bg-[#94A3B8] animate-bounce;
+  }
+
+  .skeleton {
+    @apply bg-[#334155] rounded-lg animate-pulse;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #22C55E, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass-card {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(51, 65, 85, 0.6);
+  }
+}
+
+/* Circular progress bar overrides */
+.CircularProgressbar .CircularProgressbar-trail {
+  stroke: #334155;
+}
+
+.CircularProgressbar .CircularProgressbar-text {
+  fill: #F8FAFC;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+/* Typing animation */
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+}
+
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Glow effects */
+.glow-green {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}

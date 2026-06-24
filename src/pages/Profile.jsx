@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useUser } from '../context/UserContext'
 import { formatINR, getScoreColor } from '../utils/helpers'
 import EmptyState from '../components/EmptyState'
-import { Edit2, TrendingUp, CheckCircle2 } from 'lucide-react'
+import { Edit2, TrendingUp, CheckCircle2, ArrowLeft } from 'lucide-react'
 
 const container = { hidden: {}, visible: { transition: { staggerChildren: 0.07 } } }
 const item = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }
@@ -99,9 +99,18 @@ export default function Profile() {
     >
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white">My Profile</h1>
-          <p className="text-[#94A3B8] mt-1">Your financial summary & roadmap</p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-1.5 hover:bg-[#334155]/50 rounded-lg text-[#94A3B8] hover:text-white transition-colors mr-1"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white">My Profile</h1>
+            <p className="text-[#94A3B8] mt-1">Your financial summary & roadmap</p>
+          </div>
         </div>
         <button onClick={() => navigate('/onboarding')}
           className="btn-outline flex items-center gap-2 text-sm px-4 py-2">

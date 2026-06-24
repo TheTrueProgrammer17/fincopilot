@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../context/UserContext'
-import { formatINR } from '../utils/helpers'
+import { formatINR, buildProfile, calculateDashboardMetrics } from '../utils/helpers'
 import { Send, Bot, ArrowLeft } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 const SUGGESTIONS = [
   'Should I start a SIP?',
@@ -34,47 +36,104 @@ function TypingIndicator() {
 
 export default function Copilot() {
   const navigate = useNavigate()
-  const { user, hasProfile } = useUser()
-  const [messages, setMessages] = useState([
-    {
-      role: 'ai',
-      text: `👋 Hi${user.name ? ' ' + user.name : ''}! I'm FinCopilot, your personal financial advisor. Ask me anything about your money, investments, or financial decisions. I'll give you advice tailored to your profile.`,
-    }
-  ])
+  const { user, hasProfile, transactions } = useUser()
+  const { user: authUser } = useAuth()
+  const metrics = calculateDashboardMetrics(transactions, user)
+  const defaultMessage = {
+    role: 'ai',
+    text: `👋 Hi${user.name ? ' ' + user.name : ''}! I'm FinCopilot, your personal financial advisor. Ask me anything about your money, investments, or financial decisions. I'll give you advice tailored to your profile.`,
+  }
+  const [messages, setMessages] = useState([defaultMessage])
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const [started, setStarted] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
+    if (!authUser) return;
+    const loadChat = async () => {
+      const { data } = await supabase.from('chats').select('messages').eq('user_id', authUser.id).single()
+      if (data && data.messages && data.messages.length > 0) {
+        setMessages(data.messages)
+        setStarted(true)
+      } else {
+        // try local storage as fallback
+        const local = localStorage.getItem('fincopilot_chat')
+        if (local) {
+          const parsed = JSON.parse(local)
+          setMessages(parsed)
+          setStarted(true)
+          saveChat(parsed)
+        }
+      }
+    }
+    loadChat()
+  }, [authUser])
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, typing])
 
-  const generateResponse = () => {
-    const { income, expenses, savings, loans, goal } = user
-    const totalExpenses = Object.values(expenses || {}).reduce((a, b) => a + Number(b), 0)
-      + (loans?.hasLoan ? Number(loans?.emi || 0) : 0)
-    const surplus = income - totalExpenses
-    const emfMonths = totalExpenses > 0 ? (savings / totalExpenses).toFixed(1) : 0
-
-    if (!hasProfile) {
-      return "I'd love to help, but I need your financial profile first! Please complete the onboarding to get personalised advice."
+  const saveChat = async (msgs) => {
+    if (!authUser) return;
+    localStorage.setItem('fincopilot_chat', JSON.stringify(msgs))
+    const { data: existing } = await supabase.from('chats').select('id').eq('user_id', authUser.id).single()
+    if (existing) {
+      await supabase.from('chats').update({ messages: msgs }).eq('user_id', authUser.id)
+    } else {
+      await supabase.from('chats').insert([{ user_id: authUser.id, messages: msgs }])
     }
-
-    return `Based on your financial profile, you have a monthly surplus of ${formatINR(surplus)}. Your emergency fund currently covers ${emfMonths} months of expenses. I'd recommend focusing on **${goal || 'building your emergency fund'}** first before making this decision. Want me to create a step-by-step plan? 📈`
   }
+
+  const API_BASE = 'http://localhost:8000/api'
 
   const sendMessage = async (text) => {
     const msg = text || input.trim()
     if (!msg) return
     setInput('')
     setStarted(true)
-    setMessages(prev => [...prev, { role: 'user', text: msg }])
+    
+    const newMessages = [...messages, { role: 'user', text: msg }]
+    setMessages(newMessages)
+    await saveChat(newMessages)
     setTyping(true)
 
-    await new Promise(r => setTimeout(r, 1500))
-    setTyping(false)
-    setMessages(prev => [...prev, { role: 'ai', text: generateResponse() }])
+    try {
+      const res = await fetch(`${API_BASE}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: buildProfile(user),
+          metrics_summary: {
+            monthly_income: metrics.monthlyIncome,
+            monthly_expenses: metrics.monthlyExpenses,
+            net_savings: metrics.netSavings,
+            savings_rate: metrics.savingsRate,
+            health_score: metrics.scores.overall,
+            emergency_fund_months: metrics.emfMonths,
+            top_spending_categories: Object.fromEntries(
+              Object.entries(metrics.categorySpend).sort(([,a],[,b]) => b-a).slice(0,3)
+            ),
+            transaction_count: transactions.length
+          },
+          message: msg,
+          conversation_history: messages.map(m => ({ role: m.role, content: m.text }))
+        })
+      })
+      const data = await res.json()
+      setTyping(false)
+      const aiResponse = [...newMessages, { role: 'ai', text: data.response }]
+      setMessages(aiResponse)
+      await saveChat(aiResponse)
+    } catch (e) {
+      setTyping(false)
+      const errorMsg = e instanceof TypeError 
+        ? 'Network error: Make sure the backend is running on port 8000 and CORS is properly configured.'
+        : 'Sorry, I ran into an error processing your request.'
+      const errResponse = [...newMessages, { role: 'ai', text: errorMsg }]
+      setMessages(errResponse)
+      await saveChat(errResponse)
+    }
   }
 
   const handleKey = (e) => {

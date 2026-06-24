@@ -2,9 +2,10 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useUser } from '../context/UserContext'
+import { useAuth } from '../context/AuthContext'
 import { formatINR, getScoreColor } from '../utils/helpers'
 import EmptyState from '../components/EmptyState'
-import { Edit2, TrendingUp, CheckCircle2, ArrowLeft } from 'lucide-react'
+import { Edit2, TrendingUp, CheckCircle2, RefreshCw, LogOut, ArrowLeft } from 'lucide-react'
 
 const container = { hidden: {}, visible: { transition: { staggerChildren: 0.07 } } }
 const item = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }
@@ -82,7 +83,8 @@ function buildRoadmap(goal, income, expenses, loans, savings) {
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { user, hasProfile } = useUser()
+  const { user, hasProfile, resetUser } = useUser()
+  const { logout } = useAuth()
 
   if (!hasProfile) return <EmptyState message="Complete onboarding to see your financial profile and roadmap." />
 
@@ -112,10 +114,20 @@ export default function Profile() {
             <p className="text-[#94A3B8] mt-1">Your financial summary & roadmap</p>
           </div>
         </div>
-        <button onClick={() => navigate('/onboarding')}
-          className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
-          <Edit2 size={15} /> Edit
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => navigate('/onboarding')}
+            className="btn-outline flex items-center gap-2 text-sm px-3 py-2">
+            <Edit2 size={15} /> <span className="hidden sm:inline">Edit</span>
+          </button>
+          <button onClick={resetUser}
+            className="btn-outline flex items-center gap-2 text-sm px-3 py-2 border-red-500/30 text-red-400 hover:bg-red-500/10">
+            <RefreshCw size={15} /> <span className="hidden sm:inline">Reset</span>
+          </button>
+          <button onClick={logout}
+            className="md:hidden btn-outline flex items-center gap-2 text-sm px-3 py-2 border-gray-500/30 text-gray-400 hover:bg-gray-500/10">
+            <LogOut size={15} />
+          </button>
+        </div>
       </motion.div>
 
       <motion.div variants={container} initial="hidden" animate="visible" className="space-y-6">

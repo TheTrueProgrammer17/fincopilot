@@ -3,17 +3,20 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useUser } from '../context/UserContext'
+import { useAuth } from '../context/AuthContext'
 import { Mail, Lock, User, Chrome, Circle } from 'lucide-react'
 
 export default function AuthPage() {
   const navigate = useNavigate()
-  const { updateUser } = useUser()
+  const { signup, login } = useAuth()
+  const { user } = useUser()
   const [tab, setTab] = useState('signup')
   const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (tab === 'signup' && !form.name.trim()) {
       toast.error('Please enter your full name')
@@ -22,9 +25,37 @@ export default function AuthPage() {
     if (!form.email.trim()) { toast.error('Please enter your email'); return }
     if (!form.password.trim()) { toast.error('Please enter a password'); return }
 
-    updateUser({ name: form.name || form.email.split('@')[0] })
-    toast.success(tab === 'signup' ? 'Account created! Let\'s build your profile.' : 'Welcome back!')
-    setTimeout(() => navigate('/onboarding'), 800)
+    setLoading(true)
+    try {
+      if (tab === 'signup') {
+        const { user: newAuthUser } = await signup(form.email, form.password)
+        
+        // Automatically create the user's profile record if needed
+        if (newAuthUser) {
+          const { supabase } = await import('../lib/supabase')
+          const { error: profileError } = await supabase.from('profiles').insert([{
+            user_id: newAuthUser.id,
+            name: form.name || form.email.split('@')[0],
+            monthly_income: 0,
+            health_score: 0
+          }])
+          if (profileError) {
+            console.error('Failed to create profile record:', profileError.message)
+          }
+        }
+        toast.success('Account created!')
+        navigate('/dashboard')
+      } else {
+        await login(form.email, form.password)
+        toast.success('Welcome back!')
+        // Router will redirect based on profile existence automatically, but we can push to dashboard
+        navigate('/dashboard')
+      }
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -107,8 +138,8 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <button type="submit" className="btn-primary w-full py-3.5 text-base mt-2">
-              {tab === 'signup' ? 'Create Account →' : 'Login →'}
+            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 text-base mt-2">
+              {loading ? 'Please wait...' : (tab === 'signup' ? 'Create Account →' : 'Login →')}
             </button>
           </form>
 

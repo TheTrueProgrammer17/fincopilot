@@ -1,11 +1,12 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Zap, Bot, User } from 'lucide-react'
+import { LayoutDashboard, Zap, Bot, User, Receipt } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const tabs = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/simulator', icon: Zap, label: 'Simulator' },
+  { to: '/transactions', icon: Receipt, label: 'Transactions' },
   { to: '/chat', icon: Bot, label: 'Copilot' },
   { to: '/profile', icon: User, label: 'Profile' },
 ]

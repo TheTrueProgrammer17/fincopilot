@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../context/UserContext'
 import { formatINR } from '../utils/helpers'
-import { Send, Bot } from 'lucide-react'
+import { Send, Bot, ArrowLeft } from 'lucide-react'
 
 const SUGGESTIONS = [
   'Should I start a SIP?',
@@ -32,6 +33,7 @@ function TypingIndicator() {
 }
 
 export default function Copilot() {
+  const navigate = useNavigate()
   const { user, hasProfile } = useUser()
   const [messages, setMessages] = useState([
     {
@@ -91,6 +93,13 @@ export default function Copilot() {
       {/* Header */}
       <div className="px-4 py-4 flex items-center gap-3 flex-shrink-0"
         style={{ borderBottom: '1px solid #334155', background: 'rgba(30,41,59,0.8)', backdropFilter: 'blur(12px)' }}>
+        <button
+          onClick={() => navigate(-1)}
+          className="p-1.5 hover:bg-[#334155]/50 rounded-lg text-[#94A3B8] hover:text-white transition-colors mr-1"
+          aria-label="Go back"
+        >
+          <ArrowLeft size={20} />
+        </button>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center"
           style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))', border: '1px solid rgba(34,197,94,0.3)' }}>
           <Bot size={20} color="#22C55E" />

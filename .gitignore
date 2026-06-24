@@ -1,19 +1,67 @@
-# dependencies
+# =========================
+# Node & React (Frontend)
+# =========================
 node_modules/
-
-# build files
 dist/
+dist-ssr/
+build/
+*.local
 
-# logs
-*.log
+# =========================
+# Python & FastAPI (Backend)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.venv/
+env/
+.env_backend/
 
-# environment variables
+# =========================
+# Environment Variables
+# =========================
 .env
-.env.local
+.env.*
+!.env.example
 
-# OS files
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# OS & Editors
+# =========================
 .DS_Store
+.AppleDouble
+.LSOverride
 Thumbs.db
-
-# editor
+ehthumbs.db
 .vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

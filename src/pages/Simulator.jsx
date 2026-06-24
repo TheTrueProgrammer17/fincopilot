@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../context/UserContext'
-import { getScoreColor, formatINR } from '../utils/helpers'
+import { getScoreColor, formatINR, buildProfile } from '../utils/helpers'
 import EmptyState from '../components/EmptyState'
 import { Loader2, ChevronRight } from 'lucide-react'
 
@@ -49,55 +49,83 @@ export default function Simulator() {
     setResult(null)
   }
 
+  const API_BASE = 'http://localhost:8000/api'
+
   const handleSimulate = async () => {
     if (!form.cost) return
     setCalculating(true)
-    await new Promise(r => setTimeout(r, 1000))
 
     const totalCost = Number(form.cost)
-    const rate = Number(form.rate) || 10
-    const months = Number(form.months) || 24
     const loanAmount = form.isLoan ? totalCost : 0
+    const interestRate = Number(form.rate) || 10
+    const loanMonths = Number(form.months) || 24
 
-    const emi = loanAmount > 0
-      ? (loanAmount * (rate / 1200) * Math.pow(1 + rate / 1200, months)) / (Math.pow(1 + rate / 1200, months) - 1)
-      : 0
-
-    const newTotalExpenses = totalExpenses + emi + (!form.isLoan ? totalCost / 12 : 0)
-    const newSavingsRate = income > 0 ? (income - newTotalExpenses) / income : 0
-    const newDebtRatio = income > 0 ? (existingEmi + emi) / income : 0
-    const newEmfMonths = newTotalExpenses > 0 ? savings / newTotalExpenses : 0
-    const newSavingsScore = Math.min(100, Math.max(0, newSavingsRate * 500))
-    const newDebtScore = Math.max(0, 100 - newDebtRatio * 200)
-    const newEmfScore = Math.min(100, (newEmfMonths / 6) * 100)
-    const newOverall = Math.round(newSavingsScore * 0.30 + newDebtScore * 0.30 + newEmfScore * 0.25 + goalScore * 0.15)
-
-    const currentSavingsRate = income > 0 ? (income - totalExpenses) / income : 0
-    const currentEmf = totalExpenses > 0 ? savings / totalExpenses : 0
-
-    setResult({
-      before: {
-        overall: scores.overall,
-        savingsRate: Math.round(currentSavingsRate * 100),
-        emfMonths: currentEmf.toFixed(1),
-      },
-      after: {
-        overall: newOverall,
-        savingsRate: Math.round(newSavingsRate * 100),
-        emfMonths: newEmfMonths.toFixed(1),
-      },
-      emi: Math.round(emi),
-      drop: scores.overall - newOverall,
-    })
+    try {
+      const res = await fetch(`${API_BASE}/simulate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: buildProfile(user),
+          item_name: form.name || selected?.label || 'Purchase',
+          total_cost: totalCost,
+          is_loan: form.isLoan,
+          loan_amount: loanAmount,
+          interest_rate: interestRate,
+          loan_months: loanMonths
+        })
+      })
+      const data = await res.json()
+      setResult({
+        before: {
+          overall: data.before.scores.overall,
+          savingsRate: Math.round(data.before.savings_rate),
+          emfMonths: String(data.before.emergency_fund_months),
+        },
+        after: {
+          overall: data.after.scores.overall,
+          savingsRate: Math.round(data.after.savings_rate),
+          emfMonths: String(data.after.emergency_fund_months),
+        },
+        emi: data.additional_emi,
+        drop: -(data.delta.overall),
+        explanation: data.explanation,
+      })
+    } catch (e) {
+      // Fallback to local calculation if backend unreachable
+      const rate = interestRate
+      const months = loanMonths
+      const emi = loanAmount > 0
+        ? (loanAmount * (rate / 1200) * Math.pow(1 + rate / 1200, months)) / (Math.pow(1 + rate / 1200, months) - 1)
+        : 0
+      const newTotalExpenses = totalExpenses + emi + (!form.isLoan ? totalCost / 12 : 0)
+      const newSavingsRate = income > 0 ? (income - newTotalExpenses) / income : 0
+      const newDebtRatio = income > 0 ? (existingEmi + emi) / income : 0
+      const newEmfMonths = newTotalExpenses > 0 ? savings / newTotalExpenses : 0
+      const newSavingsScore = Math.min(100, Math.max(0, newSavingsRate * 500))
+      const newDebtScore = Math.max(0, 100 - newDebtRatio * 200)
+      const newEmfScore = Math.min(100, (newEmfMonths / 6) * 100)
+      const newOverall = Math.round(newSavingsScore * 0.30 + newDebtScore * 0.30 + newEmfScore * 0.25 + goalScore * 0.15)
+      const currentSavingsRate = income > 0 ? (income - totalExpenses) / income : 0
+      const currentEmf = totalExpenses > 0 ? savings / totalExpenses : 0
+      setResult({
+        before: { overall: scores.overall, savingsRate: Math.round(currentSavingsRate * 100), emfMonths: currentEmf.toFixed(1) },
+        after: { overall: newOverall, savingsRate: Math.round(newSavingsRate * 100), emfMonths: newEmfMonths.toFixed(1) },
+        emi: Math.round(emi),
+        drop: scores.overall - newOverall,
+        explanation: null,
+      })
+    }
     setCalculating(false)
   }
 
   const aiMessage = result
-    ? result.drop > 15
-      ? 'This decision would significantly impact your financial health. Consider waiting until your emergency fund reaches 3 months of expenses.'
-      : result.drop > 5
-        ? 'This decision has a moderate impact. Make sure your emergency fund is stable before proceeding.'
-        : 'This decision has minimal financial impact given your current profile. You can proceed with confidence.'
+    ? result.explanation || (
+        result.drop > 15
+          ? 'This decision would significantly impact your financial health. Consider waiting until your emergency fund reaches 3 months of expenses.'
+          : result.drop > 5
+            ? 'This decision has a moderate impact. Make sure your emergency fund is stable before proceeding.'
+            : 'This decision has minimal financial impact given your current profile. You can proceed with confidence.'
+      )
     : ''
 
   return (

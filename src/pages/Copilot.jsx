@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../context/UserContext'
-import { formatINR } from '../utils/helpers'
+import { formatINR, buildProfile, calculateDashboardMetrics } from '../utils/helpers'
 import { Send, Bot } from 'lucide-react'
 
 const SUGGESTIONS = [
@@ -32,7 +32,8 @@ function TypingIndicator() {
 }
 
 export default function Copilot() {
-  const { user, hasProfile } = useUser()
+  const { user, hasProfile, transactions } = useUser()
+  const metrics = calculateDashboardMetrics(transactions, user)
   const [messages, setMessages] = useState([
     {
       role: 'ai',
@@ -48,19 +49,7 @@ export default function Copilot() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, typing])
 
-  const generateResponse = () => {
-    const { income, expenses, savings, loans, goal } = user
-    const totalExpenses = Object.values(expenses || {}).reduce((a, b) => a + Number(b), 0)
-      + (loans?.hasLoan ? Number(loans?.emi || 0) : 0)
-    const surplus = income - totalExpenses
-    const emfMonths = totalExpenses > 0 ? (savings / totalExpenses).toFixed(1) : 0
-
-    if (!hasProfile) {
-      return "I'd love to help, but I need your financial profile first! Please complete the onboarding to get personalised advice."
-    }
-
-    return `Based on your financial profile, you have a monthly surplus of ${formatINR(surplus)}. Your emergency fund currently covers ${emfMonths} months of expenses. I'd recommend focusing on **${goal || 'building your emergency fund'}** first before making this decision. Want me to create a step-by-step plan? 📈`
-  }
+  const API_BASE = 'http://localhost:8000/api'
 
   const sendMessage = async (text) => {
     const msg = text || input.trim()
@@ -70,9 +59,38 @@ export default function Copilot() {
     setMessages(prev => [...prev, { role: 'user', text: msg }])
     setTyping(true)
 
-    await new Promise(r => setTimeout(r, 1500))
-    setTyping(false)
-    setMessages(prev => [...prev, { role: 'ai', text: generateResponse() }])
+    try {
+      const res = await fetch(`${API_BASE}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile: buildProfile(user),
+          metrics_summary: {
+            monthly_income: metrics.monthlyIncome,
+            monthly_expenses: metrics.monthlyExpenses,
+            net_savings: metrics.netSavings,
+            savings_rate: metrics.savingsRate,
+            health_score: metrics.scores.overall,
+            emergency_fund_months: metrics.emfMonths,
+            top_spending_categories: Object.fromEntries(
+              Object.entries(metrics.categorySpend).sort(([,a],[,b]) => b-a).slice(0,3)
+            ),
+            transaction_count: transactions.length
+          },
+          message: msg,
+          conversation_history: messages.map(m => ({ role: m.role, content: m.text }))
+        })
+      })
+      const data = await res.json()
+      setTyping(false)
+      setMessages(prev => [...prev, { role: 'ai', text: data.response }])
+    } catch (e) {
+      setTyping(false)
+      const errorMsg = e instanceof TypeError 
+        ? 'Network error: Make sure the backend is running on port 8000 and CORS is properly configured.'
+        : 'Sorry, I ran into an error processing your request.'
+      setMessages(prev => [...prev, { role: 'ai', text: errorMsg }])
+    }
   }
 
   const handleKey = (e) => {

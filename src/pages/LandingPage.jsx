@@ -9,7 +9,7 @@ const fadeUp = {
 }
 
 const steps = [
-  { icon: Wallet, label: 'Tell us your finances', desc: 'Provide your income, expenses & goals — no bank linking' },
+  { icon: Wallet, label: 'Tell us your finances', desc: 'Get started in under 2 minutes' },
   { icon: BarChart2, label: 'Get your Health Score', desc: 'Receive your personalized financial health score instantly' },
   { icon: Zap, label: 'Simulate decisions', desc: 'Test financial choices before you commit to them' },
   { icon: Bot, label: 'Get AI guidance', desc: 'Chat with your AI copilot for personalized money advice' },
@@ -63,18 +63,17 @@ export default function LandingPage() {
 
         <motion.p variants={fadeUp} initial="hidden" animate="visible" custom={2}
           className="text-lg md:text-xl text-[#94A3B8] mb-10 max-w-2xl leading-relaxed">
-          Current finance apps tell you where your money went.{' '}
-          <span className="text-[#F8FAFC] font-medium">We help you decide where your money should go next.</span>
+          Understand your financial health, simulate major purchases, and get personalized AI guidance.
         </motion.p>
 
-        <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3} className="flex flex-col items-center gap-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <button
-            onClick={() => navigate('/onboarding')}
-            className="btn-primary text-lg px-10 py-4 flex items-center gap-2 glow-green"
+            onClick={() => navigate('/login')}
+            className="btn-primary text-lg px-8 py-4 mb-4 flex items-center justify-center gap-2 mx-auto"
           >
             Build My Financial Profile <ChevronRight size={20} />
           </button>
-          <p className="text-[#94A3B8] text-sm">No bank linking required • Takes less than 2 minutes • Free forever</p>
+          <p className="text-[#94A3B8] text-sm">Build your financial profile in minutes • Instant financial insights • Free forever</p>
         </motion.div>
 
         {/* Floating score card preview */}
@@ -189,12 +188,10 @@ export default function LandingPage() {
           className="max-w-3xl mx-auto text-center card p-12"
           style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(30,41,59,1))', borderColor: 'rgba(34,197,94,0.2)' }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Make Your First Smart <span className="gradient-text">Financial Decision</span>
-          </h2>
-          <p className="text-[#94A3B8] mb-8 text-lg">Join thousands of young Indians taking control of their finances.</p>
-          <button onClick={() => navigate('/onboarding')} className="btn-primary text-lg px-10 py-4">
-            Get Started — It's Free →
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">Ready to take control?</h2>
+          <p className="text-[#94A3B8] text-lg mb-8 max-w-xl mx-auto">Join thousands of young Indians making smarter financial decisions.</p>
+          <button onClick={() => navigate('/login')} className="btn-primary text-lg px-10 py-4">
+            Get Started Now →
           </button>
         </motion.div>
       </section>

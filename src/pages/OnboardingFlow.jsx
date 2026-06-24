@@ -79,7 +79,7 @@ export default function OnboardingFlow() {
 
     await new Promise(r => setTimeout(r, 1500))
 
-    updateUser({
+    await updateUser({
       income: numIncome,
       expenses: numExpenses,
       savings: numSavings,

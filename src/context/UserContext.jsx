@@ -137,11 +137,13 @@ export function UserProvider({ children }) {
         health_score: newState.scores.overall,
       }
       
-      const { data: existing } = await supabase.from('profiles').select('id').eq('user_id', authUser.id).single()
-      if (existing) {
-        await supabase.from('profiles').update(profileData).eq('user_id', authUser.id)
-      } else {
-        await supabase.from('profiles').insert([profileData])
+      const { error } = await supabase.from('profiles').upsert(
+        { ...profileData },
+        { onConflict: 'user_id' }
+      )
+      
+      if (error) {
+        console.error('Failed to update profile in Supabase:', error.message)
       }
     }
   }

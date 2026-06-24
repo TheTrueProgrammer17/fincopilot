@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../context/UserContext'
 import { formatINR, buildProfile, calculateDashboardMetrics } from '../utils/helpers'
 import { Send, Bot } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../context/AuthContext'
 
 const SUGGESTIONS = [
   'Should I start a SIP?',
@@ -33,21 +35,53 @@ function TypingIndicator() {
 
 export default function Copilot() {
   const { user, hasProfile, transactions } = useUser()
+  const { user: authUser } = useAuth()
   const metrics = calculateDashboardMetrics(transactions, user)
-  const [messages, setMessages] = useState([
-    {
-      role: 'ai',
-      text: `👋 Hi${user.name ? ' ' + user.name : ''}! I'm FinCopilot, your personal financial advisor. Ask me anything about your money, investments, or financial decisions. I'll give you advice tailored to your profile.`,
-    }
-  ])
+  const defaultMessage = {
+    role: 'ai',
+    text: `👋 Hi${user.name ? ' ' + user.name : ''}! I'm FinCopilot, your personal financial advisor. Ask me anything about your money, investments, or financial decisions. I'll give you advice tailored to your profile.`,
+  }
+  const [messages, setMessages] = useState([defaultMessage])
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
   const [started, setStarted] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
+    if (!authUser) return;
+    const loadChat = async () => {
+      const { data } = await supabase.from('chats').select('messages').eq('user_id', authUser.id).single()
+      if (data && data.messages && data.messages.length > 0) {
+        setMessages(data.messages)
+        setStarted(true)
+      } else {
+        // try local storage as fallback
+        const local = localStorage.getItem('fincopilot_chat')
+        if (local) {
+          const parsed = JSON.parse(local)
+          setMessages(parsed)
+          setStarted(true)
+          saveChat(parsed)
+        }
+      }
+    }
+    loadChat()
+  }, [authUser])
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, typing])
+
+  const saveChat = async (msgs) => {
+    if (!authUser) return;
+    localStorage.setItem('fincopilot_chat', JSON.stringify(msgs))
+    const { data: existing } = await supabase.from('chats').select('id').eq('user_id', authUser.id).single()
+    if (existing) {
+      await supabase.from('chats').update({ messages: msgs }).eq('user_id', authUser.id)
+    } else {
+      await supabase.from('chats').insert([{ user_id: authUser.id, messages: msgs }])
+    }
+  }
 
   const API_BASE = 'http://localhost:8000/api'
 
@@ -56,7 +90,10 @@ export default function Copilot() {
     if (!msg) return
     setInput('')
     setStarted(true)
-    setMessages(prev => [...prev, { role: 'user', text: msg }])
+    
+    const newMessages = [...messages, { role: 'user', text: msg }]
+    setMessages(newMessages)
+    await saveChat(newMessages)
     setTyping(true)
 
     try {
@@ -83,13 +120,17 @@ export default function Copilot() {
       })
       const data = await res.json()
       setTyping(false)
-      setMessages(prev => [...prev, { role: 'ai', text: data.response }])
+      const aiResponse = [...newMessages, { role: 'ai', text: data.response }]
+      setMessages(aiResponse)
+      await saveChat(aiResponse)
     } catch (e) {
       setTyping(false)
       const errorMsg = e instanceof TypeError 
         ? 'Network error: Make sure the backend is running on port 8000 and CORS is properly configured.'
         : 'Sorry, I ran into an error processing your request.'
-      setMessages(prev => [...prev, { role: 'ai', text: errorMsg }])
+      const errResponse = [...newMessages, { role: 'ai', text: errorMsg }]
+      setMessages(errResponse)
+      await saveChat(errResponse)
     }
   }
 

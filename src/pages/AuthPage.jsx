@@ -33,12 +33,15 @@ export default function AuthPage() {
         // Automatically create the user's profile record if needed
         if (newAuthUser) {
           const { supabase } = await import('../lib/supabase')
-          await supabase.from('profiles').insert([{
+          const { error: profileError } = await supabase.from('profiles').insert([{
             user_id: newAuthUser.id,
             name: form.name || form.email.split('@')[0],
             monthly_income: 0,
             health_score: 0
           }])
+          if (profileError) {
+            console.error('Failed to create profile record:', profileError.message)
+          }
         }
         toast.success('Account created!')
         navigate('/dashboard')

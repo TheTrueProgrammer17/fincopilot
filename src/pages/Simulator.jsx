@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useUser } from '../context/UserContext'
 import { getScoreColor, formatINR } from '../utils/helpers'
 import EmptyState from '../components/EmptyState'
-import { Loader2, ChevronRight } from 'lucide-react'
+import { Loader2, ChevronRight, ArrowLeft } from 'lucide-react'
 
 const SCENARIOS = [
   { id: 'vehicle', emoji: '🚲', label: 'Buy a Vehicle', defaultName: 'New Vehicle' },
@@ -29,6 +30,7 @@ function AnimatedNumber({ from, to, duration = 1500 }) {
 }
 
 export default function Simulator() {
+  const navigate = useNavigate()
   const { user, hasProfile } = useUser()
   const [selected, setSelected] = useState(null)
   const [form, setForm] = useState({ name: '', cost: '', isLoan: false, rate: '', months: '' })
@@ -107,9 +109,18 @@ export default function Simulator() {
     >
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
-          style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
-          ⚡ Decision Engine
+        <div className="flex items-center gap-3 mb-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-1.5 hover:bg-[#334155]/50 rounded-lg text-[#94A3B8] hover:text-white transition-colors mr-1"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold"
+            style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.2)' }}>
+            ⚡ Decision Engine
+          </div>
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2">Decision Simulator</h1>
         <p className="text-[#94A3B8]">See the impact of financial decisions before you make them</p>

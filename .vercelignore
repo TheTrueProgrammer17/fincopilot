@@ -1,0 +1,11 @@
+backend/
+.env
+.env.example
+*.py
+*.sql
+*.sh
+check_db.py
+fix_db.sql
+schema.sql
+README.md
+DEPLOYMENT.md

@@ -1,3 +1,4 @@
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -39,8 +40,12 @@ RULES:
 
 
 def _generate(prompt: str) -> str:
-    response = client.models.generate_content(model=MODEL, contents=prompt)
-    return (response.text or "").strip()
+    try:
+        response = client.models.generate_content(model=MODEL, contents=prompt)
+        return (response.text or "").strip()
+    except Exception as e:
+        logging.error(f"Gemini API Error: {e}")
+        return "I'm currently experiencing high demand or a temporary issue. Please try again in a few moments!"
 
 
 def get_chat_response(

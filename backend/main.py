@@ -8,9 +8,9 @@ from routes.simulator import router as simulator_router
 
 app = FastAPI(title="FinCopilot API", version="1.0.0")
 
-# Allow all origins by default for easy Vercel deployment,
-# or restrict via ALLOWED_ORIGINS env var
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# Allow local development origins by default,
+# or restrict/expand via ALLOWED_ORIGINS env var
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174").split(",")
 
 app.add_middleware(
     CORSMiddleware,

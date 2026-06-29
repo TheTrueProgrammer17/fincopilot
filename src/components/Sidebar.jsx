@@ -21,20 +21,37 @@ export default function Sidebar() {
   const { logout } = useAuth()
   const metrics = calculateDashboardMetrics(transactions, user)
   const score = metrics.scores.overall
-  const scoreColor = score >= 70 ? '#22C55E' : score >= 40 ? '#F59E0B' : '#EF4444'
+  const scoreColor = score >= 70 ? '#2D6A2D' : score >= 40 ? '#D4A843' : '#C0392B'
   const scoreLabel = score >= 70 ? 'Healthy' : score >= 40 ? 'Needs Work' : 'At Risk'
 
   return (
-    <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-60 z-50"
-      style={{ background: '#1E293B', borderRight: '1px solid #334155' }}>
-
-      {/* Logo */}
-      <div className="px-6 py-5" style={{ borderBottom: '1px solid #334155' }}>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span className="text-white font-bold text-lg tracking-tight">FinCopilot</span>
-        </div>
-        <p className="text-[#94A3B8] text-xs mt-1">Financial Decision Engine</p>
+    <aside
+      className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-60 z-50"
+      style={{ background: '#E8DCC8', borderRight: '2.5px solid #2C1810', boxShadow: '4px 0px 0px #2C1810' }}
+    >
+      {/* Logo / Titlebar */}
+      <div style={{ background: '#D4A843', borderBottom: '2.5px solid #2C1810', padding: '16px' }}>
+        <span style={{
+          fontFamily: "'Space Grotesk'",
+          fontWeight: 800,
+          fontSize: '20px',
+          color: '#1A0A00',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          display: 'block',
+        }}>
+          💰 FinCopilot
+        </span>
+        <p style={{
+          fontSize: '10px',
+          color: '#4A3728',
+          marginTop: '2px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+        }}>
+          Financial Decision Engine
+        </p>
       </div>
 
       {/* Nav Items */}
@@ -44,28 +61,48 @@ export default function Sidebar() {
             key={path}
             to={path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                isActive
-                  ? 'text-green-400'
-                  : 'text-[#94A3B8] hover:text-white'
+              `flex items-center gap-3 px-3 py-2.5 text-sm font-bold transition-all duration-100 uppercase tracking-wider ${
+                isActive ? '' : ''
               }`
             }
             style={({ isActive }) => isActive ? {
-              background: 'rgba(34,197,94,0.12)',
-              border: '1px solid rgba(34,197,94,0.2)',
+              background: '#D4A843',
+              border: '2px solid #2C1810',
+              boxShadow: '2px 2px 0px #2C1810',
+              color: '#1A0A00',
             } : {
-              border: '1px solid transparent',
+              border: '2px solid transparent',
+              color: '#4A3728',
+            }}
+            onMouseEnter={e => {
+              if (!e.currentTarget.style.background.includes('#D4A843')) {
+                e.currentTarget.style.background = '#F0E8D8'
+                e.currentTarget.style.border = '2px solid #2C1810'
+              }
+            }}
+            onMouseLeave={e => {
+              if (!e.currentTarget.classList.contains('active')) {
+                e.currentTarget.style.background = ''
+                e.currentTarget.style.border = '2px solid transparent'
+              }
             }}
           >
-            <Icon size={18} />
+            <Icon size={16} />
             {label}
           </NavLink>
         ))}
       </nav>
 
       {/* Health Score at bottom */}
-      <div className="px-4 py-5" style={{ borderTop: '1px solid #334155' }}>
-        <p className="text-[#94A3B8] text-xs uppercase tracking-wider mb-3">Financial Health</p>
+      <div style={{ background: '#F0E8D8', borderTop: '2.5px solid #2C1810', padding: '16px' }}>
+        <p style={{
+          fontSize: '10px',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          color: '#4A3728',
+          marginBottom: '10px',
+        }}>Financial Health</p>
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 flex-shrink-0">
             <CircularProgressbar
@@ -73,22 +110,23 @@ export default function Sidebar() {
               text={`${score}`}
               styles={buildStyles({
                 textSize: '28px',
-                textColor: scoreColor,
+                textColor: '#1A0A00',
                 pathColor: scoreColor,
-                trailColor: '#334155',
+                trailColor: '#F5F5F0',
               })}
             />
           </div>
           <div>
-            <p className="text-white font-semibold text-sm">{user.name || 'Your Profile'}</p>
-            <p className="text-xs font-medium" style={{ color: scoreColor }}>{scoreLabel}</p>
+            <p style={{ color: '#1A0A00', fontWeight: 700, fontSize: '14px' }}>{user.name || 'Your Profile'}</p>
+            <p style={{ fontSize: '11px', fontWeight: 700, color: scoreColor, textTransform: 'uppercase' }}>{scoreLabel}</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={logout}
-          className="mt-4 flex items-center gap-2 text-xs font-medium text-[#94A3B8] hover:text-white transition-colors w-full p-2 rounded-md hover:bg-[#334155]"
+          className="mt-4 retro-btn w-full"
+          style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}
         >
-          <LogOut size={14} />
+          <LogOut size={12} />
           Sign Out
         </button>
       </div>

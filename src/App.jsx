@@ -26,7 +26,7 @@ function ProtectedRoute({ children }) {
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FDF3E7] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -49,7 +49,7 @@ function AnimatedRoutes() {
   const isApp = APP_PATHS.includes(location.pathname)
 
   return (
-    <div className={isApp ? 'min-h-screen bg-[#0F172A]' : ''}>
+    <div className={isApp ? 'min-h-screen bg-[#FDF3E7]' : ''}>
       {isApp && <Sidebar />}
       <div className={isApp ? 'md:ml-60' : ''}>
         <AnimatePresence mode="wait">

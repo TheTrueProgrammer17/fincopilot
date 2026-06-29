@@ -126,7 +126,6 @@ export default function Simulator() {
         explanation: data.explanation,
       });
     } catch (e) {
-      // Fallback to local calculation if backend unreachable
       const rate = interestRate;
       const months = loanMonths;
       const emi =
@@ -198,26 +197,22 @@ export default function Simulator() {
         <div className="flex items-center gap-3 mb-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 hover:bg-[#334155]/50 rounded-lg text-[#94A3B8] hover:text-white transition-colors mr-1"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4A3728' }}
             aria-label="Go back"
           >
             <ArrowLeft size={20} />
           </button>
           <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold"
-            style={{
-              background: "rgba(245,158,11,0.1)",
-              color: "#F59E0B",
-              border: "1px solid rgba(245,158,11,0.2)",
-            }}
+            className="retro-badge"
+            style={{ background: '#D4A843' }}
           >
             ⚡ Decision Engine
           </div>
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-2">
+        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
           Decision Simulator
         </h1>
-        <p className="text-[#94A3B8]">
+        <p style={{ color: '#4A3728', fontSize: '14px', marginTop: '4px' }}>
           See the impact of financial decisions before you make them
         </p>
       </motion.div>
@@ -230,21 +225,27 @@ export default function Simulator() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06 }}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => handleScenarioSelect(s)}
-            className="card py-6 px-3 flex flex-col items-center gap-2 text-center transition-all duration-200"
-            style={{
-              borderColor: selected?.id === s.id ? "#22C55E" : "#334155",
-              background:
-                selected?.id === s.id ? "rgba(34,197,94,0.06)" : "#1E293B",
-            }}
+            className="retro-card text-center"
+            style={{ cursor: 'pointer', padding: 0 }}
           >
-            <span className="text-3xl">{s.emoji}</span>
-            <span
-              className={`text-sm font-medium ${selected?.id === s.id ? "text-[#22C55E]" : "text-[#94A3B8]"}`}
-            >
-              {s.label}
-            </span>
+            <div className={`retro-titlebar ${selected?.id === s.id ? 'retro-titlebar-green' : ''}`}
+              style={{ justifyContent: 'center', fontSize: '10px', padding: '4px 8px' }}>
+              {selected?.id === s.id ? '✓ SELECTED' : 'CLICK TO SELECT'}
+            </div>
+            <div style={{ padding: '16px 8px', background: '#F0E8D8' }}>
+              <span style={{ fontSize: '28px', display: 'block', marginBottom: '6px' }}>{s.emoji}</span>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                color: selected?.id === s.id ? '#2D6A2D' : '#4A3728',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}>
+                {s.label}
+              </span>
+            </div>
           </motion.button>
         ))}
       </div>
@@ -258,134 +259,134 @@ export default function Simulator() {
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: -20, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="overflow-hidden"
+            className="overflow-hidden mb-6"
           >
-            <div className="card p-6 mb-6 space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">
-                  Scenario Name
-                </label>
-                <input
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, name: e.target.value }))
-                  }
-                  className="input-field"
-                  placeholder="e.g. Honda Activa"
-                />
+            <div className="retro-card">
+              <div className="retro-titlebar">
+                <span>📋 Configure Scenario: {selected.label}</span>
+                <span className="retro-controls" />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-2">
-                  Total Cost (₹)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#22C55E] font-bold">
-                    ₹
-                  </span>
+              <div style={{ padding: '20px', background: '#F0E8D8' }} className="space-y-5">
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Scenario Name
+                  </label>
                   <input
-                    type="number"
-                    value={form.cost}
+                    value={form.name}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, cost: e.target.value }))
+                      setForm((f) => ({ ...f, name: e.target.value }))
                     }
-                    className="input-field pl-9"
-                    placeholder="80,000"
+                    className="retro-input"
+                    placeholder="e.g. Honda Activa"
                   />
                 </div>
-              </div>
 
-              {/* Loan toggle */}
-              <div>
-                <label className="block text-sm font-medium text-[#94A3B8] mb-3">
-                  Paying with loan?
-                </label>
-                <div className="flex gap-3">
-                  {[true, false].map((val) => (
-                    <button
-                      key={String(val)}
-                      onClick={() => setForm((f) => ({ ...f, isLoan: val }))}
-                      className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 border"
-                      style={{
-                        borderColor:
-                          form.isLoan === val ? "#22C55E" : "#334155",
-                        color: form.isLoan === val ? "#22C55E" : "#94A3B8",
-                        background:
-                          form.isLoan === val
-                            ? "rgba(34,197,94,0.08)"
-                            : "transparent",
-                      }}
-                    >
-                      {val ? "Yes" : "No (Cash)"}
-                    </button>
-                  ))}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Total Cost (₹)
+                  </label>
+                  <div className="relative">
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#2D6A2D', fontWeight: 700, fontSize: '16px' }}>
+                      ₹
+                    </span>
+                    <input
+                      type="number"
+                      value={form.cost}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, cost: e.target.value }))
+                      }
+                      className="retro-input"
+                      style={{ paddingLeft: '28px' }}
+                      placeholder="80,000"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Loan details slide-in */}
-              <AnimatePresence>
-                {form.isLoan && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="grid grid-cols-2 gap-4 overflow-hidden"
-                  >
-                    <div>
-                      <label className="block text-sm font-medium text-[#94A3B8] mb-2">
-                        Interest Rate (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={form.rate}
-                        onChange={(e) =>
-                          setForm((f) => ({ ...f, rate: e.target.value }))
-                        }
-                        className="input-field"
-                        placeholder="10.5"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#94A3B8] mb-2">
-                        Duration (months)
-                      </label>
-                      <input
-                        type="number"
-                        value={form.months}
-                        onChange={(e) =>
-                          setForm((f) => ({ ...f, months: e.target.value }))
-                        }
-                        className="input-field"
-                        placeholder="24"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                {/* Loan toggle */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Paying with loan?
+                  </label>
+                  <div className="flex gap-3">
+                    {[true, false].map((val) => (
+                      <button
+                        key={String(val)}
+                        onClick={() => setForm((f) => ({ ...f, isLoan: val }))}
+                        className={`flex-1 retro-btn ${form.isLoan === val ? 'retro-btn-green' : ''}`}
+                        style={{ padding: '10px' }}
+                      >
+                        {val ? "Yes (Loan)" : "No (Cash)"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              <button
-                onClick={handleSimulate}
-                disabled={calculating || !form.cost}
-                className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2 disabled:opacity-60"
-              >
-                {calculating ? (
-                  <>
+                {/* Loan details slide-in */}
+                <AnimatePresence>
+                  {form.isLoan && (
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 1,
-                        ease: "linear",
-                      }}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="grid grid-cols-2 gap-4 overflow-hidden"
                     >
-                      <Loader2 size={20} />
-                    </motion.div>{" "}
-                    Calculating...
-                  </>
-                ) : (
-                  "Simulate Impact ⚡"
-                )}
-              </button>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Interest Rate (%)
+                        </label>
+                        <input
+                          type="number"
+                          value={form.rate}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, rate: e.target.value }))
+                          }
+                          className="retro-input"
+                          placeholder="10.5"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Duration (months)
+                        </label>
+                        <input
+                          type="number"
+                          value={form.months}
+                          onChange={(e) =>
+                            setForm((f) => ({ ...f, months: e.target.value }))
+                          }
+                          className="retro-input"
+                          placeholder="24"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <button
+                  onClick={handleSimulate}
+                  disabled={calculating || !form.cost}
+                  className="retro-btn retro-btn-green w-full"
+                  style={{ padding: '14px', fontSize: '14px' }}
+                >
+                  {calculating ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 1,
+                          ease: "linear",
+                        }}
+                      >
+                        <Loader2 size={18} />
+                      </motion.div>{" "}
+                      Calculating...
+                    </>
+                  ) : (
+                    "Simulate Impact ⚡"
+                  )}
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -402,98 +403,66 @@ export default function Simulator() {
             className="space-y-5"
           >
             {/* Before / After */}
-            <h2 className="text-lg font-bold text-white">📊 Impact Analysis</h2>
+            <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '20px', color: '#1A0A00', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              📊 Impact Analysis
+            </h2>
             <div className="flex items-stretch gap-3">
               {/* Before */}
-              <motion.div
-                className="card p-5 flex-1"
-                animate={
-                  result.drop > 10
-                    ? { borderColor: ["#334155", "#EF4444", "#334155"] }
-                    : {}
-                }
-                transition={{ duration: 1, repeat: result.drop > 10 ? 2 : 0 }}
-              >
-                <p className="text-[#94A3B8] text-xs font-semibold uppercase tracking-wide mb-4">
-                  Before
-                </p>
-                <div className="space-y-4">
+              <div className="retro-card flex-1">
+                <div className="retro-titlebar">
+                  <span>Before</span>
+                  <span className="retro-controls" />
+                </div>
+                <div style={{ padding: '16px', background: '#F0E8D8' }} className="space-y-4">
                   {[
                     {
                       label: "Health Score",
                       before: result.before.overall,
                       after: result.after.overall,
-                      suffix: "",
                     },
                     {
                       label: "Savings Rate",
                       before: result.before.savingsRate,
                       after: result.after.savingsRate,
-                      suffix: "%",
                     },
                   ].map(({ label, before }) => (
                     <div key={label}>
-                      <p className="text-[#94A3B8] text-xs mb-1">{label}</p>
-                      <p className="text-2xl font-bold text-white">
+                      <p style={{ color: '#4A3728', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>{label}</p>
+                      <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00' }}>
                         {before}
                         {label.includes("Rate") ? "%" : ""}
                       </p>
                     </div>
                   ))}
                   <div>
-                    <p className="text-[#94A3B8] text-xs mb-1">
+                    <p style={{ color: '#4A3728', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                       Emergency Fund
                     </p>
-                    <p className="text-2xl font-bold text-white">
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00' }}>
                       {result.before.emfMonths} mo
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Arrow */}
               <div className="flex items-center justify-center px-1">
-                <div className="text-2xl text-[#94A3B8]">→</div>
+                <div style={{ fontSize: '24px', color: '#4A3728', fontWeight: 700 }}>→</div>
               </div>
 
               {/* After */}
-              <motion.div
-                className="card p-5 flex-1"
-                style={{
-                  borderColor:
-                    result.drop > 10
-                      ? "#EF444466"
-                      : result.drop < 0
-                        ? "#22C55E66"
-                        : "#334155",
-                }}
-                animate={
-                  result.drop > 10
-                    ? { borderColor: ["#334155", "#EF4444", "#EF444466"] }
-                    : {}
-                }
-                transition={{ duration: 1.5 }}
-              >
-                <p
-                  className="text-xs font-semibold uppercase tracking-wide mb-4"
-                  style={{
-                    color:
-                      result.drop > 10
-                        ? "#EF4444"
-                        : result.drop < 0
-                          ? "#22C55E"
-                          : "#F59E0B",
-                  }}
-                >
-                  After
-                </p>
-                <div className="space-y-4">
+              <div className="retro-card flex-1" style={{
+                borderColor: result.drop > 10 ? '#C0392B' : result.drop < 0 ? '#2D6A2D' : '#2C1810',
+                boxShadow: `4px 4px 0px ${result.drop > 10 ? '#C0392B' : result.drop < 0 ? '#2D6A2D' : '#2C1810'}`,
+              }}>
+                <div className={`retro-titlebar ${result.drop > 10 ? 'retro-titlebar-red' : result.drop < 0 ? 'retro-titlebar-green' : ''}`}>
+                  <span>After</span>
+                  <span className="retro-controls" />
+                </div>
+                <div style={{ padding: '16px', background: '#F0E8D8' }} className="space-y-4">
                   <div>
-                    <p className="text-[#94A3B8] text-xs mb-1">Health Score</p>
-                    <p
-                      className="text-2xl font-bold"
-                      style={{ color: getScoreColor(result.after.overall) }}
-                    >
+                    <p style={{ color: '#4A3728', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Health Score</p>
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: result.drop > 10 ? '#C0392B' : result.drop < 0 ? '#2D6A2D' : '#D4A843' }}>
                       <AnimatedNumber
                         from={result.before.overall}
                         to={result.after.overall}
@@ -501,14 +470,8 @@ export default function Simulator() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[#94A3B8] text-xs mb-1">Savings Rate</p>
-                    <p
-                      className="text-2xl font-bold"
-                      style={{
-                        color:
-                          result.after.savingsRate < 15 ? "#EF4444" : "#22C55E",
-                      }}
-                    >
+                    <p style={{ color: '#4A3728', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Savings Rate</p>
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: result.after.savingsRate < 15 ? '#C0392B' : '#2D6A2D' }}>
                       <AnimatedNumber
                         from={result.before.savingsRate}
                         to={result.after.savingsRate}
@@ -517,35 +480,36 @@ export default function Simulator() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[#94A3B8] text-xs mb-1">
+                    <p style={{ color: '#4A3728', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
                       Emergency Fund
                     </p>
-                    <p className="text-2xl font-bold text-white">
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00' }}>
                       {result.after.emfMonths} mo
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {result.emi > 0 && (
-              <div className="card px-5 py-4 flex items-center justify-between">
-                <span className="text-[#94A3B8] text-sm">
-                  Monthly EMI added
-                </span>
-                <span className="text-white font-bold text-lg">
-                  {formatINR(result.emi)}/mo
-                </span>
+              <div className="retro-card">
+                <div style={{ padding: '12px 16px', background: '#F0E8D8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#4A3728', fontSize: '13px', fontWeight: 600 }}>
+                    Monthly EMI added
+                  </span>
+                  <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '18px', color: '#C0392B' }}>
+                    {formatINR(result.emi)}/mo
+                  </span>
+                </div>
               </div>
             )}
 
             {/* Score delta badge */}
-            <div className="flex items-center gap-3">
-              <div className="card px-5 py-3 flex items-center gap-2 flex-1">
-                <span className="text-[#94A3B8] text-sm">Score impact:</span>
+            <div className="retro-card">
+              <div style={{ padding: '12px 16px', background: '#F0E8D8', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ color: '#4A3728', fontSize: '13px', fontWeight: 600 }}>Score impact:</span>
                 <span
-                  className="font-bold text-lg"
-                  style={{ color: result.drop > 0 ? "#EF4444" : "#22C55E" }}
+                  style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '18px', color: result.drop > 0 ? '#C0392B' : '#2D6A2D' }}
                 >
                   {result.drop > 0 ? "-" : "+"}
                   {Math.abs(result.drop)} points
@@ -558,44 +522,14 @@ export default function Simulator() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="card p-6"
-              style={{
-                borderColor:
-                  result.drop > 15
-                    ? "#EF4444"
-                    : result.drop > 5
-                      ? "#F59E0B"
-                      : "#22C55E",
-                background:
-                  result.drop > 15
-                    ? "rgba(239,68,68,0.04)"
-                    : result.drop > 5
-                      ? "rgba(245,158,11,0.04)"
-                      : "rgba(34,197,94,0.04)",
-              }}
+              className="retro-card"
             >
-              <div className="flex items-start gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{
-                    background:
-                      result.drop > 15
-                        ? "rgba(239,68,68,0.15)"
-                        : result.drop > 5
-                          ? "rgba(245,158,11,0.15)"
-                          : "rgba(34,197,94,0.15)",
-                  }}
-                >
-                  🤖
-                </div>
-                <div>
-                  <p className="text-white font-semibold mb-1">
-                    FinCopilot's Assessment
-                  </p>
-                  <p className="text-[#94A3B8] text-sm leading-relaxed">
-                    {aiMessage}
-                  </p>
-                </div>
+              <div className="retro-titlebar-blue retro-titlebar">
+                <span>🤖 FinCopilot Says</span>
+                <span className="retro-controls" />
+              </div>
+              <div style={{ padding: '16px', background: '#F0E8D8', fontStyle: 'italic', color: '#1A0A00', fontSize: '14px', lineHeight: 1.6 }}>
+                {aiMessage}
               </div>
             </motion.div>
           </motion.div>

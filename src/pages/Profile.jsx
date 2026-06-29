@@ -12,9 +12,15 @@ const item = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, trans
 
 function Row({ label, value, highlight }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-[#334155] last:border-0">
-      <span className="text-[#94A3B8] text-sm">{label}</span>
-      <span className={`font-semibold ${highlight ? 'text-[#22C55E]' : 'text-white'}`}>{value}</span>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '10px 0',
+      borderBottom: '2px solid #F5F5F0',
+    }}>
+      <span style={{ color: '#4A3728', fontSize: '13px', fontWeight: 600 }}>{label}</span>
+      <span style={{ fontWeight: 700, color: highlight ? '#2D6A2D' : '#1A0A00', fontSize: '14px' }}>{value}</span>
     </div>
   )
 }
@@ -23,15 +29,23 @@ function RoadmapStep({ month, text, done }) {
   return (
     <motion.div variants={item} className="flex gap-4">
       <div className="flex flex-col items-center">
-        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-          style={{ background: done ? 'rgba(34,197,94,0.15)' : '#334155', color: done ? '#22C55E' : '#94A3B8', border: `1px solid ${done ? 'rgba(34,197,94,0.4)' : '#475569'}` }}>
-          {done ? <CheckCircle2 size={16} color="#22C55E" /> : month.split('-')[0]}
+        <div style={{
+          width: '32px', height: '32px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+          fontSize: '11px', fontWeight: 700,
+          background: done ? '#D4EDD4' : '#E8DCC8',
+          color: done ? '#2D6A2D' : '#4A3728',
+          border: `2px solid ${done ? '#2D6A2D' : '#2C1810'}`,
+          boxShadow: done ? '2px 2px 0px #2D6A2D' : '2px 2px 0px #2C1810',
+        }}>
+          {done ? <CheckCircle2 size={16} color="#2D6A2D" /> : month.split('-')[0]}
         </div>
-        <div className="flex-1 w-px mt-1 mb-1" style={{ background: done ? 'rgba(34,197,94,0.2)' : '#334155', minHeight: 24 }} />
+        <div style={{ width: '2px', flex: 1, marginTop: '4px', marginBottom: '4px', background: done ? '#2D6A2D' : '#F5F5F0', minHeight: '20px' }} />
       </div>
-      <div className="pb-4">
-        <p className="text-[#22C55E] text-xs font-semibold mb-0.5">Month {month}</p>
-        <p className="text-[#F8FAFC] text-sm leading-relaxed">{text}</p>
+      <div style={{ paddingBottom: '16px' }}>
+        <p style={{ color: '#2D6A2D', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Month {month}</p>
+        <p style={{ color: '#1A0A00', fontSize: '13px', lineHeight: 1.5, fontWeight: 500 }}>{text}</p>
       </div>
     </motion.div>
   )
@@ -81,6 +95,13 @@ function buildRoadmap(goal, income, expenses, loans, savings) {
   return maps[goal] || maps['Build Emergency Fund']
 }
 
+// Helper to map getScoreColor output to retro colors
+function retroScoreColor(score) {
+  if (score >= 70) return '#2D6A2D'
+  if (score >= 40) return '#D4A843'
+  return '#C0392B'
+}
+
 export default function Profile() {
   const navigate = useNavigate()
   const { user, hasProfile, resetUser } = useUser()
@@ -104,52 +125,59 @@ export default function Profile() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 hover:bg-[#334155]/50 rounded-lg text-[#94A3B8] hover:text-white transition-colors mr-1"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4A3728' }}
             aria-label="Go back"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white">My Profile</h1>
-            <p className="text-[#94A3B8] mt-1">Your financial summary & roadmap</p>
+            <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              My Profile
+            </h1>
+            <p style={{ color: '#4A3728', fontSize: '13px', marginTop: '2px', fontWeight: 500 }}>Your financial summary & roadmap</p>
           </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => navigate('/onboarding')}
-            className="btn-outline flex items-center gap-2 text-sm px-3 py-2">
-            <Edit2 size={15} /> <span className="hidden sm:inline">Edit</span>
+            className="retro-btn" style={{ fontSize: '11px', padding: '6px 12px' }}>
+            <Edit2 size={13} /> <span className="hidden sm:inline">Edit</span>
           </button>
           <button onClick={resetUser}
-            className="btn-outline flex items-center gap-2 text-sm px-3 py-2 border-red-500/30 text-red-400 hover:bg-red-500/10">
-            <RefreshCw size={15} /> <span className="hidden sm:inline">Reset</span>
+            className="retro-btn retro-btn-red" style={{ fontSize: '11px', padding: '6px 12px' }}>
+            <RefreshCw size={13} /> <span className="hidden sm:inline">Reset</span>
           </button>
           <button onClick={logout}
-            className="md:hidden btn-outline flex items-center gap-2 text-sm px-3 py-2 border-gray-500/30 text-gray-400 hover:bg-gray-500/10">
-            <LogOut size={15} />
+            className="retro-btn md:hidden" style={{ fontSize: '11px', padding: '6px 12px' }}>
+            <LogOut size={13} />
           </button>
         </div>
       </motion.div>
 
       <motion.div variants={container} initial="hidden" animate="visible" className="space-y-6">
         {/* Financial Summary */}
-        <motion.div variants={item} className="card p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <TrendingUp size={18} color="#22C55E" />
-            <h2 className="font-bold text-white">Financial Summary</h2>
+        <motion.div variants={item} className="retro-card">
+          <div className="retro-titlebar">
+            <span>📈 Financial Summary</span>
+            <span className="retro-controls" />
           </div>
-          <Row label="Name" value={name || '—'} />
-          <Row label="Monthly Income" value={formatINR(income)} highlight />
-          <Row label="Total Monthly Expenses" value={formatINR(totalExpenses)} />
-          <Row label="Monthly Surplus" value={formatINR(surplus)} highlight={surplus > 0} />
-          <Row label="Current Savings" value={formatINR(savings)} />
-          {loans?.hasLoan && <Row label="Loan EMI" value={formatINR(loans.emi)} />}
-          <Row label="Primary Goal" value={goal || '—'} highlight />
+          <div style={{ padding: '16px', background: '#F0E8D8' }}>
+            <Row label="Name" value={name || '—'} />
+            <Row label="Monthly Income" value={formatINR(income)} highlight />
+            <Row label="Total Monthly Expenses" value={formatINR(totalExpenses)} />
+            <Row label="Monthly Surplus" value={formatINR(surplus)} highlight={surplus > 0} />
+            <Row label="Current Savings" value={formatINR(savings)} />
+            {loans?.hasLoan && <Row label="Loan EMI" value={formatINR(loans.emi)} />}
+            <Row label="Primary Goal" value={goal || '—'} highlight />
+          </div>
         </motion.div>
 
         {/* Score summary */}
-        <motion.div variants={item} className="card p-6">
-          <h2 className="font-bold text-white mb-5">Health Scores</h2>
-          <div className="space-y-4">
+        <motion.div variants={item} className="retro-card">
+          <div className="retro-titlebar-blue retro-titlebar">
+            <span>🏆 Health Scores</span>
+            <span className="retro-controls" />
+          </div>
+          <div style={{ padding: '16px', background: '#F0E8D8' }} className="space-y-4">
             {[
               { label: 'Overall', score: scores.overall },
               { label: 'Emergency Fund', score: scores.emergencyFund },
@@ -157,14 +185,13 @@ export default function Profile() {
               { label: 'Savings Rate', score: scores.savingsRate },
             ].map(({ label, score }) => (
               <div key={label}>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-[#94A3B8]">{label}</span>
-                  <span className="font-bold" style={{ color: getScoreColor(score) }}>{score}/100</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
+                  <span style={{ color: '#4A3728', fontWeight: 600 }}>{label}</span>
+                  <span style={{ fontWeight: 700, color: retroScoreColor(score) }}>{score}/100</span>
                 </div>
-                <div className="score-bar">
+                <div className="retro-progress-track">
                   <motion.div
-                    className="score-bar-fill"
-                    style={{ background: getScoreColor(score) }}
+                    className={`retro-progress-fill ${retroScoreColor(score) === '#2D6A2D' ? 'green' : retroScoreColor(score) === '#C0392B' ? 'red' : ''}`}
                     initial={{ width: 0 }}
                     animate={{ width: `${score}%` }}
                     transition={{ duration: 0.8, delay: 0.2 }}
@@ -176,18 +203,18 @@ export default function Profile() {
         </motion.div>
 
         {/* Goal Roadmap */}
-        <motion.div variants={item} className="card p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-xl">🗓️</span>
-            <div>
-              <h2 className="font-bold text-white">Goal Roadmap</h2>
-              <p className="text-[#94A3B8] text-sm">{goal}</p>
-            </div>
+        <motion.div variants={item} className="retro-card">
+          <div className="retro-titlebar-green retro-titlebar">
+            <span>🗓️ Goal Roadmap</span>
+            <span className="retro-controls" />
           </div>
-          <div className="pl-1">
-            {roadmap.map((step, i) => (
-              <RoadmapStep key={i} month={step.month} text={step.text} done={i === 0} />
-            ))}
+          <div style={{ padding: '16px', background: '#F0E8D8' }}>
+            <p style={{ color: '#4A3728', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>{goal}</p>
+            <div style={{ paddingLeft: '4px' }}>
+              {roadmap.map((step, i) => (
+                <RoadmapStep key={i} month={step.month} text={step.text} done={i === 0} />
+              ))}
+            </div>
           </div>
         </motion.div>
       </motion.div>

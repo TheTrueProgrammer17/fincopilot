@@ -23,15 +23,21 @@ function TypingIndicator() {
   return (
     <div className="flex items-end gap-3 mb-4">
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+        className="w-8 h-8 flex items-center justify-center flex-shrink-0"
         style={{
-          background: "rgba(34,197,94,0.15)",
-          border: "1px solid rgba(34,197,94,0.2)",
+          background: "#FDEBD0",
+          border: "2px solid #F39C12",
+          boxShadow: "2px 2px 0px #F39C12",
         }}
       >
-        <Bot size={16} color="#22C55E" />
+        <Bot size={16} color="#F39C12" />
       </div>
-      <div className="card px-5 py-4 max-w-xs">
+      <div style={{
+        background: '#F0E8D8',
+        border: '2px solid #2C1810',
+        boxShadow: '2px 2px 0px #2C1810',
+        padding: '12px 16px',
+      }}>
         <div className="flex items-center gap-1.5">
           {[0, 1, 2].map((i) => (
             <div
@@ -78,7 +84,6 @@ export default function Copilot() {
         setMessages(data.messages);
         setStarted(true);
       } else {
-        // try local storage as fallback
         const local = localStorage.getItem("fincopilot_chat");
         if (local) {
           const parsed = JSON.parse(local);
@@ -189,43 +194,39 @@ export default function Copilot() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="flex flex-col h-screen pb-16 md:pb-0"
-      style={{ background: "#0F172A" }}
+      style={{ background: "#F5F5F0" }}
     >
-      {/* Header */}
+      {/* Header titlebar */}
       <div
-        className="px-4 py-4 flex items-center gap-3 flex-shrink-0"
-        style={{
-          borderBottom: "1px solid #334155",
-          background: "rgba(30,41,59,0.8)",
-          backdropFilter: "blur(12px)",
-        }}
+        className="px-4 py-3 flex items-center gap-3 flex-shrink-0 retro-titlebar-blue retro-titlebar"
+        style={{ fontSize: '14px', padding: '10px 16px' }}
       >
         <button
           onClick={() => navigate(-1)}
-          className="p-1.5 hover:bg-[#334155]/50 rounded-lg text-[#94A3B8] hover:text-white transition-colors mr-1"
+          className="mr-1"
+          style={{ color: '#F0E8D8', background: 'none', border: 'none', cursor: 'pointer' }}
           aria-label="Go back"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
         </button>
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          className="w-8 h-8 flex items-center justify-center"
           style={{
-            background:
-              "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))",
-            border: "1px solid rgba(34,197,94,0.3)",
+            background: "rgba(240,232,216,0.2)",
+            border: "1px solid rgba(240,232,216,0.4)",
           }}
         >
-          <Bot size={20} color="#22C55E" />
+          <Bot size={16} color="#F0E8D8" />
         </div>
         <div>
-          <h1 className="text-white font-bold">🤖 FinCopilot</h1>
-          <p className="text-[#94A3B8] text-xs">
+          <span style={{ fontWeight: 800, letterSpacing: '0.08em' }}>🤖 FINCOPILOT CHAT</span>
+          <p style={{ fontSize: '10px', color: 'rgba(240,232,216,0.7)', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>
             Always answers based on your financial profile
           </p>
         </div>
         <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse-slow" />
-          <span className="text-[#22C55E] text-xs font-medium">Online</span>
+          <div className="w-2 h-2 bg-[#2D6A2D] animate-pulse-slow" style={{ border: '1px solid #2C1810' }} />
+          <span style={{ fontSize: '10px', fontWeight: 700, color: '#F0E8D8' }}>ONLINE</span>
         </div>
       </div>
 
@@ -239,8 +240,8 @@ export default function Copilot() {
               exit={{ opacity: 0, y: -10 }}
               className="mb-6"
             >
-              <p className="text-[#94A3B8] text-sm text-center mb-4">
-                Suggested questions
+              <p style={{ color: '#4A3728', fontSize: '12px', textAlign: 'center', marginBottom: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Suggested Questions
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {SUGGESTIONS.map((s) => (
@@ -248,12 +249,8 @@ export default function Copilot() {
                     key={s}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => sendMessage(s)}
-                    className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:border-[#22C55E]/50"
-                    style={{
-                      background: "#1E293B",
-                      border: "1px solid #334155",
-                      color: "#94A3B8",
-                    }}
+                    className="retro-btn"
+                    style={{ fontSize: '11px', padding: '6px 12px', textTransform: 'none', letterSpacing: 0 }}
                   >
                     {s}
                   </motion.button>
@@ -274,29 +271,40 @@ export default function Copilot() {
           >
             {msg.role === "ai" && (
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                className="w-8 h-8 flex items-center justify-center flex-shrink-0"
                 style={{
-                  background: "rgba(34,197,94,0.15)",
-                  border: "1px solid rgba(34,197,94,0.2)",
+                  background: "#FDEBD0",
+                  border: "2px solid #F39C12",
+                  boxShadow: "2px 2px 0px #F39C12",
                 }}
               >
-                <Bot size={16} color="#22C55E" />
+                <Bot size={16} color="#F39C12" />
               </div>
             )}
             <div
-              className="max-w-xs md:max-w-md px-4 py-3 rounded-2xl text-sm leading-relaxed"
               style={
                 msg.role === "user"
                   ? {
-                      background: "#22C55E",
-                      color: "#fff",
-                      borderBottomRightRadius: 4,
+                      background: "#D4A843",
+                      border: "2px solid #2C1810",
+                      boxShadow: "2px 2px 0px #2C1810",
+                      fontFamily: "Space Grotesk",
+                      color: "#1A0A00",
+                      padding: "10px 14px",
+                      maxWidth: "70%",
+                      fontSize: "14px",
+                      lineHeight: 1.5,
                     }
                   : {
-                      background: "#1E293B",
-                      border: "1px solid #334155",
-                      color: "#F8FAFC",
-                      borderBottomLeftRadius: 4,
+                      background: "#F0E8D8",
+                      border: "2px solid #2C1810",
+                      boxShadow: "2px 2px 0px #2C1810",
+                      fontFamily: "Space Grotesk",
+                      color: "#1A0A00",
+                      padding: "10px 14px",
+                      maxWidth: "70%",
+                      fontSize: "14px",
+                      lineHeight: 1.5,
                     }
               }
             >
@@ -311,27 +319,23 @@ export default function Copilot() {
 
       {/* Input bar */}
       <div
-        className="px-4 py-3 flex-shrink-0"
-        style={{ borderTop: "1px solid #334155", background: "#1E293B" }}
+        style={{ borderTop: "2.5px solid #2C1810", background: "#E8DCC8", padding: "12px", display: "flex", gap: "8px", flexShrink: 0 }}
       >
-        <div className="flex items-center gap-3">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Ask anything about your money..."
-            className="flex-1 bg-transparent outline-none text-[#F8FAFC] placeholder-[#94A3B8] text-sm"
-            style={{ border: "none" }}
-          />
-          <button
-            onClick={() => sendMessage()}
-            disabled={!input.trim()}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 disabled:opacity-40"
-            style={{ background: "#22C55E" }}
-          >
-            <Send size={16} color="#fff" />
-          </button>
-        </div>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder="Ask FinCopilot anything..."
+          className="retro-input flex-1"
+          style={{ border: "2.5px solid #2C1810" }}
+        />
+        <button
+          onClick={() => sendMessage()}
+          disabled={!input.trim()}
+          className="retro-btn retro-btn-green"
+        >
+          Send ▶
+        </button>
       </div>
     </motion.div>
   );

@@ -155,6 +155,7 @@ Create two `.env` files.
 ```
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_URL=http://localhost:8000/api
 ```
 
 **Backend (`/backend/.env`):**
@@ -178,9 +179,9 @@ cd ..
 
 ---
 
-## Running the App
+## Local Development
 
-You need **two terminals** running at the same time.
+You need **two terminals** running at the same time to run the app locally.
 
 ### Terminal 1 — Backend (FastAPI)
 
@@ -192,12 +193,13 @@ uvicorn main:app --reload --port 8000
 ### Terminal 2 — Frontend (React)
 
 ```bash
+npm install
 npm run dev
 ```
 
 ### Open the app
 
-👉 **http://localhost:5173**
+👉 **http://localhost:5173** (or http://localhost:5174 if port is busy)
 
 ---
 

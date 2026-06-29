@@ -30,7 +30,6 @@ export default function AuthPage() {
       if (tab === 'signup') {
         const { user: newAuthUser } = await signup(form.email, form.password)
         
-        // Automatically create the user's profile record if needed
         if (newAuthUser) {
           const { supabase } = await import('../lib/supabase')
           const { error: profileError } = await supabase.from('profiles').insert([{
@@ -48,7 +47,6 @@ export default function AuthPage() {
       } else {
         await login(form.email, form.password)
         toast.success('Welcome back!')
-        // Router will redirect based on profile existence automatically, but we can push to dashboard
         navigate('/dashboard')
       }
     } catch (error) {
@@ -62,103 +60,118 @@ export default function AuthPage() {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
       className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: '#F5F5F0' }}
     >
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 rounded-full opacity-5"
-          style={{ background: 'radial-gradient(circle, #22C55E, transparent)' }} />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 rounded-full opacity-5"
-          style={{ background: 'radial-gradient(circle, #22C55E, transparent)' }} />
-      </div>
+      {/* Background decoration — retro grid */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'linear-gradient(#2C1810 1px, transparent 1px), linear-gradient(90deg, #2C1810 1px, transparent 1px)',
+        backgroundSize: '40px 40px',
+        opacity: 0.04,
+      }} />
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg,#22C55E,#16a34a)' }}>
-              <Circle size={16} fill="#fff" color="#fff" />
-            </div>
-            <span className="text-2xl font-bold text-white">FinCopilot</span>
-          </div>
-          <p className="text-[#94A3B8]">Your AI-powered financial decision engine</p>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            💰 FinCopilot
+          </span>
+          <p style={{ color: '#4A3728', fontSize: '13px', fontWeight: 500, marginTop: '4px' }}>Your AI-powered financial decision engine</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="card p-8">
-          {/* Tabs */}
-          <div className="flex rounded-xl p-1 mb-8" style={{ background: '#0F172A' }}>
-            {['signup', 'login'].map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  tab === t ? 'bg-[#22C55E] text-white shadow-lg' : 'text-[#94A3B8] hover:text-white'
-                }`}>
-                {t === 'signup' ? 'Sign Up' : 'Login'}
+          className="retro-card">
+          <div className="retro-titlebar-blue retro-titlebar">
+            <span>🔐 {tab === 'login' ? 'Login' : 'Create Account'}</span>
+            <span className="retro-controls" />
+          </div>
+          <div style={{ padding: '24px', background: '#F0E8D8' }}>
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', background: '#F5F5F0', border: '2.5px solid #2C1810', padding: '4px' }}>
+              {['signup', 'login'].map(t => (
+                <button key={t} onClick={() => setTab(t)}
+                  style={{
+                    flex: 1,
+                    padding: '8px',
+                    fontFamily: "'Space Grotesk'",
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    cursor: 'pointer',
+                    border: tab === t ? '2px solid #2C1810' : '2px solid transparent',
+                    background: tab === t ? '#F39C12' : 'transparent',
+                    color: tab === t ? '#F0E8D8' : '#4A3728',
+                    boxShadow: tab === t ? '2px 2px 0px #2C1810' : 'none',
+                  }}>
+                  {t === 'signup' ? 'Sign Up' : 'Login'}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <AnimatePresence mode="wait">
+                {tab === 'signup' && (
+                  <motion.div
+                    key="name-field"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
+                    <div className="relative">
+                      <User size={14} color="#4A3728" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                      <input
+                        name="name" type="text" value={form.name} onChange={handleChange}
+                        placeholder="Rahul Sharma" className="retro-input" style={{ paddingLeft: '32px' }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address</label>
+                <div className="relative">
+                  <Mail size={14} color="#4A3728" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input name="email" type="email" value={form.email} onChange={handleChange}
+                    placeholder="rahul@example.com" className="retro-input" style={{ paddingLeft: '32px' }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
+                <div className="relative">
+                  <Lock size={14} color="#4A3728" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input name="password" type="password" value={form.password} onChange={handleChange}
+                    placeholder="••••••••" className="retro-input" style={{ paddingLeft: '32px' }} />
+                </div>
+              </div>
+
+              <button type="submit" disabled={loading} className="retro-btn retro-btn-blue w-full" style={{ padding: '12px', fontSize: '14px' }}>
+                {loading ? 'Please wait...' : (tab === 'signup' ? 'Create Account →' : 'Login →')}
               </button>
-            ))}
-          </div>
+            </form>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <AnimatePresence mode="wait">
-              {tab === 'signup' && (
-                <motion.div
-                  key="name-field"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <label className="block text-sm font-medium text-[#94A3B8] mb-2">Full Name</label>
-                  <div className="relative">
-                    <User size={16} color="#94A3B8" className="absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      name="name" type="text" value={form.name} onChange={handleChange}
-                      placeholder="Rahul Sharma" className="input-field pl-10"
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">Email Address</label>
-              <div className="relative">
-                <Mail size={16} color="#94A3B8" className="absolute left-3 top-1/2 -translate-y-1/2" />
-                <input name="email" type="email" value={form.email} onChange={handleChange}
-                  placeholder="rahul@example.com" className="input-field pl-10" />
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
+              <div style={{ flex: 1, height: '2px', background: '#2C1810' }} />
+              <span style={{ color: '#4A3728', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>or continue with</span>
+              <div style={{ flex: 1, height: '2px', background: '#2C1810' }} />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">Password</label>
-              <div className="relative">
-                <Lock size={16} color="#94A3B8" className="absolute left-3 top-1/2 -translate-y-1/2" />
-                <input name="password" type="password" value={form.password} onChange={handleChange}
-                  placeholder="••••••••" className="input-field pl-10" />
-              </div>
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 text-base mt-2">
-              {loading ? 'Please wait...' : (tab === 'signup' ? 'Create Account →' : 'Login →')}
+            <button
+              onClick={() => toast('Google OAuth coming soon! 🚀', { icon: '🔐' })}
+              className="retro-btn w-full"
+              style={{ padding: '10px' }}
+            >
+              <Chrome size={16} />
+              Continue with Google
             </button>
-          </form>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-[#334155]" />
-            <span className="text-[#94A3B8] text-xs">or continue with</span>
-            <div className="flex-1 h-px bg-[#334155]" />
           </div>
-
-          <button
-            onClick={() => toast('Google OAuth coming soon! 🚀', { icon: '🔐' })}
-            className="btn-outline w-full py-3 flex items-center justify-center gap-2"
-          >
-            <Chrome size={18} />
-            Continue with Google
-          </button>
         </motion.div>
 
-        <p className="text-center text-[#94A3B8] text-xs mt-6">
+        <p style={{ textAlign: 'center', color: '#4A3728', fontSize: '11px', marginTop: '16px', fontWeight: 600 }}>
           By signing up, you agree to our Terms & Privacy Policy
         </p>
       </div>

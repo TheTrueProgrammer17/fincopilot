@@ -80,141 +80,192 @@ export default function Transactions() {
     >
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
-          style={{ background: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)' }}>
+        <div className="retro-badge" style={{ marginBottom: '8px' }}>
           🧾 Transaction Log
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-1">Transactions</h1>
-        <p className="text-[#94A3B8] text-sm">Track your income and expenses in real time</p>
+        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '28px', color: '#1A0A00', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+          Transactions
+        </h1>
+        <p style={{ color: '#4A3728', fontSize: '13px', marginTop: '4px' }}>Track your income and expenses in real time</p>
       </motion.div>
 
       {/* Add Transaction Form */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className="card p-6 mb-6">
-        <h2 className="text-white font-bold mb-4">Add Transaction</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Type Toggle */}
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { val: 'expense', label: '⬇ Expense', color: '#EF4444' },
-              { val: 'income', label: '⬆ Income', color: '#22C55E' },
-            ].map(({ val, label, color }) => (
-              <button key={val} type="button" onClick={() => handleTypeChange(val)}
-                className="py-3 rounded-xl font-semibold text-sm transition-all duration-200 border"
-                style={{
-                  borderColor: type === val ? color : '#334155',
-                  color: type === val ? color : '#94A3B8',
-                  background: type === val ? `${color}14` : 'transparent',
-                }}>
-                {label}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-6">
+        <div className="retro-card">
+          <div className="retro-titlebar">
+            <span>➕ Add Transaction</span>
+            <span className="retro-controls" />
+          </div>
+          <div style={{ padding: '16px', background: '#F0E8D8' }}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Type Toggle */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { val: 'expense', label: '⬇ Expense' },
+                  { val: 'income', label: '⬆ Income' },
+                ].map(({ val, label }) => (
+                  <button key={val} type="button" onClick={() => handleTypeChange(val)}
+                    className={`retro-btn ${
+                      val === 'expense'
+                        ? type === val ? 'retro-btn-red' : ''
+                        : type === val ? 'retro-btn-green' : ''
+                    } w-full`}
+                    style={{ padding: '10px' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Amount */}
+              <div className="relative">
+                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#2D6A2D', fontWeight: 700, fontSize: '18px' }}>₹</span>
+                <input
+                  type="number" min="1" value={form.amount}
+                  onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+                  className="retro-input"
+                  style={{ paddingLeft: '28px', fontSize: '18px', fontWeight: 700 }}
+                  placeholder="0"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</label>
+                <select value={form.category}
+                  onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                  className="retro-select">
+                  {categories.map(c => (
+                    <option key={c} value={c}>{CATEGORY_ICONS[c] || '📌'} {c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Description + Date */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description (optional)</label>
+                  <input value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    className="retro-input" placeholder="e.g. Swiggy Order" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#4A3728', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date</label>
+                  <input type="date" value={form.date}
+                    onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                    className="retro-input" />
+                </div>
+              </div>
+
+              <button type="submit" className="retro-btn retro-btn-green w-full" style={{ padding: '12px', fontSize: '14px' }}>
+                + Add Transaction
               </button>
-            ))}
+            </form>
           </div>
-
-          {/* Amount */}
-          <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#22C55E] font-bold text-lg">₹</span>
-            <input
-              type="number" min="1" value={form.amount}
-              onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
-              className="input-field pl-9 text-lg font-semibold" placeholder="0"
-            />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-[#94A3B8] mb-2">Category</label>
-            <select value={form.category}
-              onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-              className="input-field"
-              style={{ background: '#1E293B', color: '#F8FAFC' }}>
-              {categories.map(c => (
-                <option key={c} value={c}>{CATEGORY_ICONS[c] || '📌'} {c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Description + Date */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">Description (optional)</label>
-              <input value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                className="input-field" placeholder="e.g. Swiggy Order" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#94A3B8] mb-2">Date</label>
-              <input type="date" value={form.date}
-                onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                className="input-field"
-                style={{ colorScheme: 'dark' }} />
-            </div>
-          </div>
-
-          <button type="submit" className="btn-primary w-full py-4 text-base font-semibold">
-            + Add Transaction
-          </button>
-        </form>
+        </div>
       </motion.div>
 
       {/* Transaction History */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h2 className="text-lg font-bold text-white mb-4">History
-          <span className="text-[#94A3B8] text-sm font-normal ml-2">({transactions.length} total)</span>
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 800, fontSize: '18px', color: '#1A0A00', textTransform: 'uppercase' }}>History</h2>
+          <span style={{ color: '#4A3728', fontSize: '13px' }}>({transactions.length} total)</span>
+        </div>
 
         {transactions.length === 0 ? (
-          <div className="card p-10 text-center">
-            <div className="text-4xl mb-3">🧾</div>
-            <p className="text-white font-semibold mb-1">No transactions yet</p>
-            <p className="text-[#94A3B8] text-sm">Add your first transaction above to get started</p>
+          <div className="retro-card">
+            <div className="retro-titlebar">
+              <span>📋 Transaction History</span>
+              <span className="retro-controls" />
+            </div>
+            <div style={{ padding: '40px', background: '#F0E8D8', textAlign: 'center' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>🧾</div>
+              <p style={{ fontWeight: 700, color: '#1A0A00', marginBottom: '4px' }}>No transactions yet</p>
+              <p style={{ color: '#4A3728', fontSize: '13px' }}>Add your first transaction above to get started</p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-5">
-            {Object.entries(grouped).map(([dateLabel, txs]) => (
-              <div key={dateLabel}>
-                <p className="text-[#94A3B8] text-xs font-semibold uppercase tracking-wide mb-2">{dateLabel}</p>
-                <div className="space-y-2">
-                  {txs.map(tx => (
+          <div className="retro-card">
+            <div className="retro-titlebar">
+              <span>📋 Transaction History</span>
+              <span className="retro-controls" />
+            </div>
+            <div style={{ background: '#F0E8D8' }}>
+              {Object.entries(grouped).map(([dateLabel, txs]) => (
+                <div key={dateLabel}>
+                  {/* Date header */}
+                  <div style={{
+                    background: '#F5F5F0',
+                    borderTop: '2px solid #2C1810',
+                    borderBottom: '2px solid #2C1810',
+                    padding: '4px 12px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: '#4A3728',
+                  }}>
+                    {dateLabel}
+                  </div>
+                  {txs.map((tx, index) => (
                     <AnimatePresence key={tx.id}>
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
-                        className="card px-4 py-3 flex items-center gap-3"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px 12px',
+                          borderBottom: '2px solid #F5F5F0',
+                          background: index % 2 === 0 ? '#F0E8D8' : '#E8DCC8',
+                          gap: '10px',
+                        }}
                       >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl"
-                          style={{ background: tx.type === 'income' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '18px',
+                          flexShrink: 0,
+                          background: tx.type === 'income' ? '#D4EDD4' : '#F8D7D0',
+                          border: `2px solid ${tx.type === 'income' ? '#2D6A2D' : '#C0392B'}`,
+                        }}>
                           {CATEGORY_ICONS[tx.category] || '📌'}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm font-medium truncate">
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ color: '#1A0A00', fontSize: '13px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {tx.description || tx.category}
                           </p>
-                          <p className="text-[#94A3B8] text-xs">{tx.category}</p>
+                          <p style={{ color: '#4A3728', fontSize: '11px' }}>{tx.category}</p>
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="font-bold text-sm" style={{ color: tx.type === 'income' ? '#22C55E' : '#EF4444' }}>
+                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                          <p style={{ fontWeight: 700, fontSize: '14px', color: tx.type === 'income' ? '#2D6A2D' : '#C0392B' }}>
                             {tx.type === 'income' ? '+' : '-'}{formatINR(tx.amount)}
                           </p>
                         </div>
                         <button
                           onClick={() => confirmDelete(tx.id)}
-                          className="ml-1 p-2 rounded-lg transition-all duration-200 flex-shrink-0"
                           style={{
-                            background: deleting === tx.id ? 'rgba(239,68,68,0.15)' : 'transparent',
-                            color: deleting === tx.id ? '#EF4444' : '#94A3B8',
+                            padding: '6px',
+                            background: deleting === tx.id ? '#F8D7D0' : 'transparent',
+                            border: deleting === tx.id ? '2px solid #C0392B' : '2px solid transparent',
+                            color: deleting === tx.id ? '#C0392B' : '#4A3728',
+                            cursor: 'pointer',
+                            flexShrink: 0,
                           }}
                           title={deleting === tx.id ? 'Tap again to confirm' : 'Delete'}
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={14} />
                         </button>
                       </motion.div>
                     </AnimatePresence>
                   ))}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </motion.div>
